@@ -1,0 +1,46 @@
+##创建服务网关
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: devops-gateway-release
+  namespace: release
+spec:
+  selector:
+    istio: ingressgateway-dev
+  servers:
+  - hosts:
+    - '*'
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+
+#创建虚拟服务
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: svc-devops-release
+  namespace: release
+spec:
+  hosts:
+  - devops-release.qinying.info
+  gateways:
+  - devops-gateway-release
+  http:
+    - route:
+      - destination:
+          host: svc-devops-release
+          subset: aswww
+
+#创建路由规则
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: svc-devops-release
+  namespace: release
+spec:
+  host: svc-devops-release
+  subsets:
+  - labels:
+      version: aswww
+    name: aswww
